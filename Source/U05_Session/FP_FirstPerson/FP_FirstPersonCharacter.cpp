@@ -101,6 +101,13 @@ void AFP_FirstPersonCharacter::OnFire()
 	{
 		DamagedComponent->AddImpulseAtLocation(ShootDir * WeaponDamage, Impact.Location);
 	}
+
+	//총알이 나가야 될거고
+	//TP_Mesh 몽타쥬 재생
+	//소리, 파티클....
+	OnServer();
+	
+	
 }
 
 
@@ -139,4 +146,22 @@ FHitResult AFP_FirstPersonCharacter::WeaponTrace(const FVector& StartTrace, cons
 	GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, COLLISION_WEAPON, TraceParams);
 
 	return Hit;
+}
+
+void AFP_FirstPersonCharacter::OnServer_Implementation()
+{
+	CLog::Print("Only Server Call");
+
+	//OnNetMulticast();
+	OnClient();
+}
+
+void AFP_FirstPersonCharacter::OnNetMulticast_Implementation()
+{
+	CLog::Print("Multicast Call");
+}
+
+void AFP_FirstPersonCharacter::OnClient_Implementation()
+{
+	CLog::Print("Client Call");
 }

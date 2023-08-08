@@ -6,7 +6,7 @@
 #include "Widgets/CMenu.h"
 #include "Widgets/CMenuBase.h"
 
-const static FName SESSION_NAME = TEXT("GameSession99");
+const static FName SESSION_NAME = TEXT("GameSession");
 const static FName SESSION_SETTINGS_KEY = TEXT("SessionKey");
 
 UCGameInstance::UCGameInstance(const FObjectInitializer& ObjectInitializer)

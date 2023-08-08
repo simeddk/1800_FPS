@@ -71,5 +71,16 @@ public:
 	FORCEINLINE class USkeletalMeshComponent* GetFP_Mesh() const { return FP_Mesh; }
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return Camera; }
 
+
+	//RPC
+private:
+	UFUNCTION(Reliable, Server)
+		void OnServer();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void OnNetMulticast();
+
+	UFUNCTION(Client, Unreliable)
+		void OnClient();
 };
 

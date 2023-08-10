@@ -37,6 +37,10 @@ class AFP_FirstPersonCharacter : public ACharacter
 public:
 	AFP_FirstPersonCharacter();
 
+protected:
+	virtual void BeginPlay() override;
+
+public:
 //Properties
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 		float BaseTurnRate;
@@ -84,6 +88,7 @@ protected:
 public:
 	FORCEINLINE class USkeletalMeshComponent* GetFP_Mesh() const { return FP_Mesh; }
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return Camera; }
+
 
 };
 

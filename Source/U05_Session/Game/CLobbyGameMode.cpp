@@ -35,6 +35,6 @@ void ACLobbyGameMode::StartGame()
 	UWorld* world = GetWorld();
 	CheckNull(world);
 
-	bUseSeamlessTravel = true;
+	//bUseSeamlessTravel = true;
 	world->ServerTravel("/Game/Maps/FPS?listen");
 }

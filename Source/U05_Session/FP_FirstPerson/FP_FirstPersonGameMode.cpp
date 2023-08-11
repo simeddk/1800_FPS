@@ -1,10 +1,10 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "FP_FirstPersonGameMode.h"
+#include "Global.h"
 #include "FP_FirstPersonHUD.h"
 #include "FP_FirstPersonCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Game/CGameState.h"
+#include "Game/CPlayerState.h"
 
 AFP_FirstPersonGameMode::AFP_FirstPersonGameMode()
 {
@@ -17,4 +17,22 @@ AFP_FirstPersonGameMode::AFP_FirstPersonGameMode()
 
 	//GameState Class
 	GameStateClass = ACGameState::StaticClass();
+
+	//PlayerState Class
+	PlayerStateClass = ACPlayerState::StaticClass();
+}
+
+void AFP_FirstPersonGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	ACPlayerState* playerState = Cast<ACPlayerState>(NewPlayer->PlayerState);
+	CheckNull(playerState);
+
+	AFP_FirstPersonCharacter* playerPawn = Cast<AFP_FirstPersonCharacter>(NewPlayer->GetPawn());
+	CheckNull(playerPawn);
+
+	playerPawn->SetPlayerState(playerState);
+	playerPawn->CurrentTeam = playerState->Team;
+	playerPawn->SetTeamColor(playerState->Team);
 }

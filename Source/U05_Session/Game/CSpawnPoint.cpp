@@ -17,17 +17,38 @@ void ACSpawnPoint::OnConstruction(const FTransform& Transform)
 		Capsule->ShapeColor = FColor(255, 0, 0);
 	else
 		Capsule->ShapeColor = FColor(0, 0, 255);
+
+	Capsule->SetHiddenInGame(bHiddenInGame);
 }
 
 void ACSpawnPoint::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	OnActorBeginOverlap.AddDynamic(this, &ACSpawnPoint::BeginOverlap);
+	OnActorEndOverlap.AddDynamic(this, &ACSpawnPoint::EndOverlap);
 }
 
 void ACSpawnPoint::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	Capsule->UpdateOverlaps();
+}
+
+void ACSpawnPoint::BeginOverlap(AActor* OverlapActor, AActor* OtherActor)
+{
+	CheckFalse(HasAuthority());
+	
+	if (OverlappingActors.Find(OtherActor) < 0)
+		OverlappingActors.Add(OtherActor);
+}
+
+void ACSpawnPoint::EndOverlap(AActor* OverlapActor, AActor* OtherActor)
+{
+	CheckFalse(HasAuthority());
+
+	if (OverlappingActors.Find(OtherActor) >= 0)
+		OverlappingActors.Remove(OtherActor);
 }
 

@@ -56,17 +56,8 @@ void AFP_FirstPersonGameMode::PostLogin(APlayerController* NewPlayer)
 	playerPawn->CurrentTeam = playerState->Team;
 	playerPawn->SetTeamColor(playerState->Team);
 
-	//Get 스폰포인트s
 	UWorld* world = GetWorld();
 	CheckNull(world);
-
-	for (TActorIterator<ACSpawnPoint> it(world); it; ++it)
-	{
-		if (it->GetTeam() == ETeamType::Red)
-			RedTeamSpawnPoints.Add(*it);
-		else
-			BlueTeamSpawnPoints.Add(*it);
-	}
 
 	SpawnHost(world);
 
@@ -92,7 +83,16 @@ void AFP_FirstPersonGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	UWorld* world = GetWorld();
+	CheckNull(world);
+
+	for (TActorIterator<ACSpawnPoint> it(world); it; ++it)
+	{
+		if (it->GetTeam() == ETeamType::Red)
+			RedTeamSpawnPoints.Add(*it);
+		else
+			BlueTeamSpawnPoints.Add(*it);
+	}
 	
 }
 
@@ -116,9 +116,10 @@ void AFP_FirstPersonGameMode::MoveToSpawnPoint(AFP_FirstPersonCharacter* InPlaye
 			return;
 		}
 
-		//스폰포인트가 블락되어 있는 경우
-		if (WaitingPlayers.Find(InPlayer) < 0)
-			WaitingPlayers.Add(InPlayer);
-		
 	}
+
+	
+	//스폰포인트가 블락되어 있는 경우
+	if (WaitingPlayers.Find(InPlayer) < 0)
+		WaitingPlayers.Add(InPlayer);
 }

@@ -38,7 +38,10 @@ class AFP_FirstPersonCharacter : public ACharacter
 public:
 	AFP_FirstPersonCharacter();
 
+	class ACPlayerState* GetSelfPlayerState();
+
 protected:
+	virtual void PossessedBy(AController* NewController) override;
 	virtual void BeginPlay() override;
 
 public:
@@ -57,6 +60,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		UAnimMontage* TP_FireAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		UAnimMontage* TP_HitAnimation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		float WeaponRange;
@@ -78,6 +84,14 @@ protected:
 		void FireEffect();
 	void FireEffect_Implementation();
 
+	UFUNCTION(NetMulticast, Reliable)
+		void PlayDead();
+	void PlayDead_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void PlayHit();
+	void PlayHit_Implementation();
+
 public:
 	UFUNCTION(NetMulticast, Reliable)
 		void SetTeamColor(ETeamType InTeamType);
@@ -90,7 +104,8 @@ protected:
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
-	FHitResult WeaponTrace(const FVector& StartTrace, const FVector& EndTrace) const;
+	FHitResult WeaponTrace(const FVector& StartTrace, const FVector& EndTrace);
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
@@ -102,5 +117,6 @@ public:
 
 private:
 	class UMaterialInstanceDynamic* DynamicMaterial;
+	class ACPlayerState* SelfPlayerState;
 };
 

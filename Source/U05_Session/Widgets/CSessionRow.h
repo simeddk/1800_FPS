@@ -35,7 +35,8 @@ private:
 
 
 private:
-	class UCMenu* Parent;
+	UPROPERTY()
+		class UCMenu* Parent;
 
 	uint32 SelfIndex;
 	

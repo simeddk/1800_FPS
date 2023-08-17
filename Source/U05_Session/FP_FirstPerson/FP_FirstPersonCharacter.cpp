@@ -11,6 +11,8 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "CBullet.h"
 #include "Game/CPlayerState.h"
+#include "Game/CSpawnPoint.h"
+#include "FP_FirstPersonGameMode.h"
 
 
 #define COLLISION_WEAPON		ECC_GameTraceChannel1
@@ -79,9 +81,12 @@ void AFP_FirstPersonCharacter::PossessedBy(AController* NewController)
 void AFP_FirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if (HasAuthority() == false)
 		SetTeamColor(CurrentTeam);
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSpawnPoint::StaticClass(), IgnoreActors);
+
 }
 
 void AFP_FirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -104,8 +109,21 @@ void AFP_FirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AFP_FirstPersonCharacter::LookUpAtRate);
 }
 
+void AFP_FirstPersonCharacter::Respawn()
+{
+	CheckFalse(HasAuthority());
+
+	AFP_FirstPersonGameMode* gameMode = Cast<AFP_FirstPersonGameMode>(GetWorld()->GetAuthGameMode());
+	CheckNull(gameMode);
+
+	gameMode->Respawn(this);
+	Destroy(true);
+}
+
 void AFP_FirstPersonCharacter::OnFire()
 {
+	CheckTrue(SelfPlayerState->Health <= 0);
+
 	if (FireAnimation != NULL)
 	{
 		UAnimInstance* AnimInstance = FP_Mesh->GetAnimInstance();
@@ -176,6 +194,10 @@ void AFP_FirstPersonCharacter::PlayDead_Implementation()
 	GetMesh()->SetPhysicsBlendWeight(1);
 	GetMesh()->SetSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	FP_Mesh->SetCollisionProfileName("Ragdoll");
+	FP_Mesh->SetPhysicsBlendWeight(1);
+	FP_Mesh->SetSimulatePhysics(true);
 }
 
 void AFP_FirstPersonCharacter::PlayHit_Implementation()
@@ -234,13 +256,16 @@ FHitResult AFP_FirstPersonCharacter::WeaponTrace(const FVector& StartTrace, cons
 {
 	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, GetInstigator());
 	TraceParams.bReturnPhysicalMaterial = true;
+	TraceParams.AddIgnoredActors(IgnoreActors);
 
 	FHitResult Hit(ForceInit);
 	GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, COLLISION_WEAPON, TraceParams);
 
 	CheckFalseResult(Hit.bBlockingHit, Hit);
 	AFP_FirstPersonCharacter* other = Cast<AFP_FirstPersonCharacter>(Hit.GetActor());
-	if (!!other)
+	if (!!other &&
+		other->SelfPlayerState->Team != SelfPlayerState->Team &&
+		other->SelfPlayerState->Health > 0)
 	{
 		FDamageEvent damageEvent;
 		other->TakeDamage(WeaponDamage, damageEvent, GetController(), this);
@@ -267,6 +292,15 @@ float AFP_FirstPersonCharacter::TakeDamage(float DamageAmount, FDamageEvent cons
 		if (!!causer)
 			causer->SelfPlayerState->Score++;
 
+		FTimerHandle handle;
+		GetWorldTimerManager().SetTimer
+		(
+			handle,
+			this,
+			&AFP_FirstPersonCharacter::Respawn,
+			3.f
+		);
+
 		return DamageAmount;
 	}
 
@@ -283,9 +317,3 @@ void AFP_FirstPersonCharacter::GetLifetimeReplicatedProps(TArray< FLifetimePrope
 	DOREPLIFETIME(AFP_FirstPersonCharacter, CurrentTeam);
 }
 
-//Todo
-//팀킬
-//상대방 시체 능욕 -> 점수 파밍
-//내가 죽었을 때는 조작 금지
-//죽었을 때 내 화면에서 "죽었다" 메세지 띄우기
-//리스폰

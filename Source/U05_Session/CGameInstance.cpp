@@ -106,7 +106,7 @@ void UCGameInstance::CreateSession()
 			sessionSettings.bUsesPresence = true;
 		}
 
-		sessionSettings.NumPublicConnections = 4;
+		sessionSettings.NumPublicConnections = 2;
 		sessionSettings.bShouldAdvertise = true;
 		sessionSettings.Set(SESSION_SETTINGS_KEY, DesiredSessionName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 

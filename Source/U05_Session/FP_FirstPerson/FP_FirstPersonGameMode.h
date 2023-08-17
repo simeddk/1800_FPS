@@ -21,6 +21,7 @@ protected:
 public:
 	void MoveToSpawnPoint(class AFP_FirstPersonCharacter* InPlayer);
 	void SpawnHost(UWorld* world);
+	void Respawn(class AFP_FirstPersonCharacter* InPlayer);
 
 private:
 	TArray<class AFP_FirstPersonCharacter*> RedTeamPlayers;
